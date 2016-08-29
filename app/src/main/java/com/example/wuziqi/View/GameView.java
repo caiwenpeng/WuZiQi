@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.example.wuziqi.GameBean.Point;
 
@@ -189,6 +190,9 @@ public class GameView extends View {
                         addPoint(x, y);
 
                         Log.e("TEST", "onTouch");
+
+                        JudgeFinish();
+
                         invalidate();
                         break;
                 }
@@ -221,9 +225,9 @@ public class GameView extends View {
     *  判断该点是否可以添加棋子
      */
     private boolean iFAddPoint(float x, float y) {
-        Log.e("TEST", "iFAddPoint");
+        Log.e("TEST", "iFAddPoint  +x +y + width: " + width + "  " + x + "  " + y);
 
-        if ((int) x == 0 || x == width || y == 0 || y == width) {
+        if ((int) x == 0 || x > weight * (count - 1) || y == 0 || y > weight * (count - 1)) {
             return false;
         }
 
@@ -268,10 +272,105 @@ public class GameView extends View {
 
     public void resetGame() {
 
+        initListener();
+
         if (mPoints != null && mPoints.size() != 0) {
 
             mPoints = new ArrayList<>();
             invalidate();
         }
     }
+
+
+    public void JudgeFinish() {
+
+        for (Point p : mPoints) {
+
+            if (isFinished(p)) {
+
+                Toast.makeText(getContext(), "胜利", Toast.LENGTH_SHORT).show();
+//                this.setFocusable(false);
+                setOnTouchListener(new OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View view, MotionEvent motionEvent) {
+
+                        Toast.makeText(getContext(), "请点击开始游戏按钮", Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
+                });
+
+                return;
+            }
+
+        }
+
+    }
+
+    private boolean isFinished(Point point) {
+
+        float x = point.getX();
+        float y = point.getY();
+        int type = point.getType();
+        /*
+        **  计算横的时候
+         */
+
+        if (isHaved(x - weight, y, type) && isHaved(x - 2 * weight, y, type) && isHaved(x + weight, y, type) && isHaved(x + 2 * weight, y, type)) {
+            return true;
+        }
+        /*
+        **  计算竖的时候
+         */
+
+        if (isHaved(x, y - weight, type) && isHaved(x, y - 2 * weight, type) && isHaved(x, y + weight, type) && isHaved(x, y + 2 * weight, type)) {
+            return true;
+        }
+
+         /*
+        **  计算、的时候
+         */
+
+        if (isHaved(x - weight, y - weight, type) && isHaved(x - 2 * weight, y - 2 * weight, type)
+                && isHaved(x + weight, y + weight, type) && isHaved(x + 2 * weight, y + 2 * weight, type)) {
+            return true;
+        }
+
+          /*
+        **  计算/的时候
+         */
+        if (isHaved(x - weight, y + weight, type) && isHaved(x - 2 * weight, y + 2 * weight, type)
+                && isHaved(x + weight, y - weight, type) && isHaved(x + 2 * weight, y - 2 * weight, type)) {
+            return true;
+        }
+
+        return false;
+
+    }
+
+    private boolean isHaved(float x, float y, int type) {
+
+        if ((int) x <= 0 || x == width || y <= 0 || y == width) {
+
+            /*
+            ** 出界
+             */
+            return false;
+        }
+
+        if (mPoints != null) {
+            if (mPoints.size() != 0) {
+                for (Point p : mPoints) {
+                    if (p.isHaving(x, y, type)) {
+//                        Log.e("TEST", "iFAddPoint:111:false");
+                        return true;
+
+                    }
+                }
+            }
+            Log.e("TEST", "iFAddPoint::true");
+
+        }
+        return false;
+    }
+
 }

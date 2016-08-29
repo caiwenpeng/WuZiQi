@@ -49,4 +49,19 @@ public class Point {
         return false;
     }
 
+    public boolean isHaving(float x, float y, int t) {
+
+        if (this.x == x && this.y == y) {
+
+            if (type==t)
+            return true;
+
+        }
+
+        return false;
+    }
+
+
+
+
 }
